@@ -1,40 +1,57 @@
 # SafeShell++
 
-Transactional Command Execution with Semantic Intent Analysis, AI-Generated Undo Plans & Proactive Archival
+SafeShell++ is a **command-safety research prototype** for exploring how a shell assistant might explain a command's likely impact and suggest a safer action before execution.
 
-SafeShell++ is an indigenous Linux command safety framework that prevents irreversible damage by intercepting commands, understanding their semantic impact, simulating execution, and offering rollback or archival options.
+The current implementation is a Python command-line demonstration. It parses commands, applies path-based heuristics, predicts effects for a small command subset, and prints an impact report. It **does not** execute commands in a sandbox, create real filesystem snapshots, or guarantee rollback.
 
-## Problem
-Linux users and administrators often run destructive commands (e.g., `rm -rf`, wrong `chmod`) without realising the full consequences. Existing tools provide no undo mechanism, no semantic understanding, and no transactional safety.
+## What the current prototype does
 
-## Solution
-SafeShell++ combines:
-- **Semantic Intent Analysis** - local LLM classifies files and predicts importance.
-- **Sandbox Simulation** - run command in isolated environment to observe exact changes.
-- **AI-Generated Undo Plans** - step-by-step rollback instructions.
-- **Proactive Archival** - compress and archive instead of delete.
-- **Transactional Execution** - commit or rollback using overlayfs/LVM snapshots.
+1. Parse an entered command into arguments.
+2. Inspect paths using heuristic importance rules.
+3. Predict likely changes for selected commands such as `rm`, `touch`, `chmod`, and `kill`.
+4. Generate a suggested action and a text-based impact report.
+5. Ask whether to proceed, archive, or cancel.
 
-## Modules
-- `command_interceptor.py` - hooks into shell
-- `semantic_analyzer.py` - LLM-based file classification
-- `simulator.py` - sandbox execution and change detection
-- `undo_plan_generator.py` - LLM rollback plan generation
-- `transaction_manager.py` - snapshot/commit/rollback
-- `impact_report.py` - human-readable risk summary
-- `cli.py` - command line interface
+The confirmation step is currently illustrative: it records and clears an in-memory transaction identifier. Selecting **Proceed** does not run the shell command, and **Archive** does not yet archive the affected files.
 
-## Status
-Prototype / Skeleton code. Full implementation in progress.
+## Run locally
 
-## Setup
-1. Install dependencies: `pip install -r requirements.txt`
-2. Install sandbox tools: `sudo apt install bubblewrap`
-3. Run: `python src/cli.py`
-4. Run tests: `pytest`
+Use Python 3.10+ and install the dependencies:
 
-## Architecture
-See `architecture.png` for system design.
+```bash
+python -m pip install -r requirements.txt
+python src/cli.py
+```
+
+For the included unit tests:
+
+```bash
+python -m pytest tests -q
+```
+
+The module tests exercise parsing, impact prediction, reporting, and transaction-state handling. Passing them would not establish that real-world command execution or recovery is safe.
+
+## Code map
+
+| File | Current responsibility |
+| --- | --- |
+| `src/cli.py` | Interactive command prompt and confirmation flow |
+| `src/command_interceptor.py` | Command parsing |
+| `src/semantic_analyzer.py` | Heuristic categorization of paths |
+| `src/simulator.py` | Predicted effects for a limited set of commands |
+| `src/undo_plan_generator.py` | Suggested response to predicted changes |
+| `src/transaction_manager.py` | In-memory transaction state (placeholder) |
+| `src/impact_report.py` | Human-readable summary |
+| `tests/test_basic.py` | Basic component tests |
+
+## Planned, not implemented
+
+The original design explores integration with local language models, isolated command execution, archival, and actual snapshot/restore mechanisms. These are **future engineering tasks**, not guarantees of the current code. The architecture sketch is in `architecture.png`.
+
+## Safety boundaries
+
+Do not use SafeShell++ as a protective wrapper around real destructive commands. The simulator does not inspect the filesystem or all command flags, and its predicted change list can differ from the actual effect of a command. Use ordinary shell precautions, backups, and a separate disposable test environment for experimentation.
 
 ## License
-MIT
+
+MIT.
