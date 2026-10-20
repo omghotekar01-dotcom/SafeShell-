@@ -1,13 +1,13 @@
 """
 Simulator Module
-Executes the command in an isolated sandbox and records changes.
+Predicts a small subset of command effects without executing them.
 """
 
 from typing import Dict, List
 
 
 class SandboxSimulator:
-    """Runs commands inside a sandbox to predict impact."""
+    """Predicts changes from command names and arguments without running commands."""
 
     def __init__(self, sandbox_tool: str = "bwrap"):
         self.sandbox_tool = sandbox_tool
