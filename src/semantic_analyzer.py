@@ -1,6 +1,6 @@
 """
 Semantic Analyzer Module
-Uses a local LLM to classify files and directories by importance and category.
+Classifies paths using fixed heuristics; LLM integration is not implemented.
 """
 
 import json
